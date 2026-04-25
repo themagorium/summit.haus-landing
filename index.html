@@ -432,45 +432,107 @@ STEP 3: Fix Vercel 404
   })();
 </script>
 
-
 <script>
-(function(){
-  function drawQR(){
-    var cvs = document.getElementById('sh-qr');
-    if(!cvs) return;
-    var ctx = cvs.getContext('2d');
-    var sz = 96;
-    // Load qrcodejs synchronously via dynamic script
-    var s = document.createElement('script');
-    s.src='https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js';
-    s.onload=function(){
-      // Clear canvas and draw QR
-      var tmp=document.createElement('div');
-      new QRCode(tmp,{
-        text:'https://www.summit.haus',
-        width:sz,height:sz,
-        colorDark:'#c9a84c',
-        colorLight:'#111c2b',
-        correctLevel:QRCode.CorrectLevel.M
+  (function () {
+    var MEMBERSHIP_EMAIL = "membership@summit.haus";
+    var FORM_ENDPOINT = "https://formsubmit.co/ajax/" + MEMBERSHIP_EMAIL;
+ 
+    function byId(id) {
+      return document.getElementById(id);
+    }
+ 
+    document.querySelectorAll('a[href="#waitlist"]').forEach(function (anchor) {
+      anchor.addEventListener("click", function (event) {
+        event.preventDefault();
+        byId("waitlist").scrollIntoView({ behavior: "smooth" });
       });
-      // QRCode renders into tmp — copy canvas to our canvas
-      var qrCanvas=tmp.querySelector('canvas');
-      if(qrCanvas){ctx.drawImage(qrCanvas,0,0);}
-    };
-    s.onerror=function(){
-      // Fallback: draw an X pattern if library fails
-      ctx.fillStyle='#111c2b';
-      ctx.fillRect(0,0,sz,sz);
-      ctx.strokeStyle='rgba(201,168,76,0.3)';
-      ctx.lineWidth=1;
-      ctx.strokeRect(4,4,sz-8,sz-8);
-    };
-    document.head.appendChild(s);
-  }
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',drawQR);
-  } else { drawQR(); }
-})();
+    });
+ 
+    function validate() {
+      var valid = true;
+      [
+        ["first_name", "field_first_name", "required"],
+        ["last_name", "field_last_name", "required"],
+        ["email", "field_email", "email"]
+      ].forEach(function (item) {
+        var value = byId(item[0]).value.trim();
+        var bad = !value || (item[2] === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value));
+        byId(item[1]).classList[bad ? "add" : "remove"]("error");
+        if (bad) valid = false;
+      });
+      return valid;
+    }
+ 
+    ["first_name", "last_name", "email"].forEach(function (id) {
+      byId(id).addEventListener("input", function () {
+        byId("field_" + id).classList.remove("error");
+      });
+    });
+ 
+    byId("waitlistForm").addEventListener("submit", function (event) {
+      event.preventDefault();
+      if (!validate()) return;
+ 
+      var payload = {
+        first_name: byId("first_name").value.trim(),
+        last_name: byId("last_name").value.trim(),
+        email: byId("email").value.trim(),
+        phone: byId("phone").value.trim() || "-",
+        city: byId("city").value.trim() || "-",
+        referred_by: byId("referred_by").value || "-",
+        referral_name: byId("referral_name").value.trim() || "-",
+        message: byId("message").value.trim() || "-",
+        submitted_at: new Date().toISOString().replace("T", " ").substring(0, 19) + " UTC"
+      };
+ 
+      var button = byId("submitBtn");
+      var text = byId("submitText");
+      var status = byId("formStatus");
+ 
+      button.disabled = true;
+      text.textContent = "Sending...";
+      status.className = "form-status";
+      status.textContent = "Transmitting your request...";
+ 
+      var formPayload = new FormData();
+      formPayload.append("_subject", "Summit Haus Membership Request");
+      formPayload.append("_captcha", "false");
+      formPayload.append("_template", "table");
+ 
+      Object.keys(payload).forEach(function (key) {
+        formPayload.append(key, payload[key]);
+      });
+ 
+      fetch(FORM_ENDPOINT, {
+        method: "POST",
+        headers: { "Accept": "application/json" },
+        body: formPayload
+      }).then(function (response) {
+        if (!response.ok) throw new Error("Form delivery failed");
+ 
+        byId("waitlistForm").style.display = "none";
+        byId("formSuccess").classList.add("visible");
+        byId("formSuccess").focus();
+      }).catch(function () {
+        var body = Object.keys(payload).map(function (key) {
+          return encodeURIComponent(key.replace(/_/g, " ").toUpperCase() + ": " + payload[key]);
+        }).join("%0A");
+ 
+        window.location.href =
+          "mailto:" + MEMBERSHIP_EMAIL +
+          "?subject=Summit%20Haus%20Membership%20Request&body=" + body;
+ 
+        status.className = "form-status";
+        status.textContent = "Please send the prepared email to complete your request.";
+        button.disabled = false;
+        text.textContent = "Send";
+      });
+    });
+  })();
 </script>
 </body>
 </html>
+
+
+
+
