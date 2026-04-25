@@ -209,229 +209,6 @@
   </div>
   <p class="footer-copy">&#169; 2026 Summit Haus AG. All rights reserved.</p>
 </footer>
-
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-/*
-================================================
-  SUMMIT HAUS - Setup Guide
-================================================
-STEP 1: EmailJS (sends to membership@summit.haus)
-  1. Create free account at emailjs.com
-  2. Add Email Service (connect Gmail or SMTP)
-  3. Create Email Template - set recipient to
-     membership@summit.haus, add these variables:
-     {{first_name}} {{last_name}} {{email}} {{phone}}
-     {{city}} {{referred_by}} {{referral_name}}
-     {{message}} {{submitted_at}}
-  4. Fill in the three IDs below
-
-STEP 2: Google Sheets (auto-logs every submission)
-  1. Create Google Sheet with headers:
-     Timestamp | First Name | Last Name | Email |
-     Phone | City | Referred By | Referral Name | Message
-  2. Extensions > Apps Script > paste script from:
-     https://github.com/jamiewilson/form-to-google-sheets
-  3. Deploy as web app > copy URL to GOOGLE_SHEETS_URL
-
-STEP 3: Fix Vercel 404
-  - In Vercel dashboard, go to summit-haus-landing > Domains
-  - Add www.summit.haus and confirm the "Move domain" dialog
-  - DNS: set www CNAME to cname.vercel-dns.com
-================================================
-*/
-
-<script>
-  var MEMBERSHIP_EMAIL = 'membership@summit.haus';
-  var FORM_ENDPOINT = 'https://formsubmit.co/ajax/' + MEMBERSHIP_EMAIL;
- 
-  (function() {
-    document.querySelectorAll('a[href="#waitlist"]').forEach(function(a) {
-      a.addEventListener('click', function(e) {
-        e.preventDefault();
-        document.getElementById('waitlist').scrollIntoView({ behavior: 'smooth' });
-      });
-    });
- 
-    var heroBtn = document.getElementById('heroBtn');
-    if (heroBtn) {
-      heroBtn.addEventListener('mouseenter', function() {
-        heroBtn.style.background = 'var(--gold)';
-        heroBtn.style.color = 'var(--navy)';
-      });
-      heroBtn.addEventListener('mouseleave', function() {
-        heroBtn.style.background = 'transparent';
-        heroBtn.style.color = 'var(--gold-light)';
-      });
-    }
- 
-    function validate() {
-      var valid = true;
-      [
-        ['first_name', 'field_first_name', 'required'],
-        ['last_name', 'field_last_name', 'required'],
-        ['email', 'field_email', 'email']
-      ].forEach(function(c) {
-        var v = document.getElementById(c[0]).value.trim();
-        var bad = !v || (c[2] === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
-        document.getElementById(c[1]).classList[bad ? 'add' : 'remove']('error');
-        if (bad) valid = false;
-      });
-      return valid;
-    }
- 
-    ['first_name', 'last_name', 'email'].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) {
-        el.addEventListener('input', function() {
-          var f = document.getElementById('field_' + id);
-          if (f) f.classList.remove('error');
-        });
-      }
-    });
- 
-    document.getElementById('waitlistForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      if (!validate()) return;
- 
-      var payload = {
-        first_name: document.getElementById('first_name').value.trim(),
-        last_name: document.getElementById('last_name').value.trim(),
-        email: document.getElementById('email').value.trim(),
-        phone: document.getElementById('phone').value.trim() || '-',
-        city: document.getElementById('city').value.trim() || '-',
-        referred_by: document.getElementById('referred_by').value || '-',
-        referral_name: document.getElementById('referral_name').value.trim() || '-',
-        message: document.getElementById('message').value.trim() || '-',
-        submitted_at: new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC'
-      };
- 
-      var btn = document.getElementById('submitBtn');
-      var txt = document.getElementById('submitText');
-      var st = document.getElementById('formStatus');
- 
-      btn.disabled = true;
-      txt.textContent = 'Sending...';
-      st.className = 'form-status sending';
-      st.textContent = 'Transmitting your request...';
- 
-      var formPayload = new FormData();
-      formPayload.append('_subject', 'Summit Haus Membership Request');
-      formPayload.append('_captcha', 'false');
-      formPayload.append('_template', 'table');
- 
-      Object.keys(payload).forEach(function(key) {
-        formPayload.append(key, payload[key]);
-      });
- 
-      fetch(FORM_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Accept': 'application/json' },
-        body: formPayload
-      }).then(function(response) {
-        if (!response.ok) throw new Error('Form delivery failed');
- 
-        document.getElementById('waitlistForm').style.display = 'none';
-        document.getElementById('formSuccess').classList.add('visible');
-      }).catch(function() {
-        var body = Object.keys(payload).map(function(key) {
-          return encodeURIComponent(key.replace(/_/g, ' ').toUpperCase() + ': ' + payload[key]);
-        }).join('%0A');
- 
-        window.location.href =
-          'mailto:' + MEMBERSHIP_EMAIL +
-          '?subject=Summit%20Haus%20Membership%20Request&body=' + body;
- 
-        st.className = 'form-status sending';
-        st.textContent = 'Please send the prepared email to complete your request.';
-        btn.disabled = false;
-        txt.textContent = 'Send';
-      });
-    });
-  })();
-</script>
-
-
-  (function() {
-    if (EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
-      emailjs.init(EMAILJS_PUBLIC_KEY);
-    }
-
-    document.querySelectorAll('a[href="#waitlist"]').forEach(function(a) {
-      a.addEventListener('click', function(e) {
-        e.preventDefault();
-        document.getElementById('waitlist').scrollIntoView({ behavior: 'smooth' });
-      });
-    });
-
-    var heroBtn = document.getElementById('heroBtn');
-    if (heroBtn) {
-      heroBtn.addEventListener('mouseenter', function() { heroBtn.style.background='var(--gold)'; heroBtn.style.color='var(--navy)'; });
-      heroBtn.addEventListener('mouseleave', function() { heroBtn.style.background='transparent'; heroBtn.style.color='var(--gold-light)'; });
-    }
-
-    function validate() {
-      var valid = true;
-      [['first_name','field_first_name','required'],['last_name','field_last_name','required'],['email','field_email','email']].forEach(function(c) {
-        var v = document.getElementById(c[0]).value.trim();
-        var bad = !v || (c[2]==='email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
-        document.getElementById(c[1]).classList[bad?'add':'remove']('error');
-        if (bad) valid = false;
-      });
-      return valid;
-    }
-
-    ['first_name','last_name','email'].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) el.addEventListener('input', function() {
-        var f = document.getElementById('field_'+id); if(f) f.classList.remove('error');
-      });
-    });
-
-    document.getElementById('waitlistForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      if (!validate()) return;
-
-      var ts = new Date().toISOString().replace('T',' ').substring(0,19)+' UTC';
-      var payload = {
-        first_name:    document.getElementById('first_name').value.trim(),
-        last_name:     document.getElementById('last_name').value.trim(),
-        email:         document.getElementById('email').value.trim(),
-        phone:         document.getElementById('phone').value.trim()||'—',
-        city:          document.getElementById('city').value.trim()||'—',
-        referred_by:   document.getElementById('referred_by').value||'—',
-        referral_name: document.getElementById('referral_name').value.trim()||'—',
-        message:       document.getElementById('message').value.trim()||'—',
-        submitted_at:  ts
-      };
-
-      var btn=document.getElementById('submitBtn'), txt=document.getElementById('submitText'), st=document.getElementById('formStatus');
-      btn.disabled=true; txt.textContent='Sending…';
-      st.className='form-status sending'; st.textContent='Transmitting your request…';
-
-      var emailP = (EMAILJS_PUBLIC_KEY!=='YOUR_PUBLIC_KEY')
-        ? emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, payload)
-        : Promise.resolve({fallback:true});
-
-      var sheetsP = GOOGLE_SHEETS_URL
-        ? fetch(GOOGLE_SHEETS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(function(){})
-        : Promise.resolve();
-
-      Promise.all([emailP, sheetsP]).then(function(res) {
-        document.getElementById('waitlistForm').style.display='none';
-        document.getElementById('formSuccess').classList.add('visible');
-        if (res[0] && res[0].fallback) {
-          var body = Object.entries(payload).map(function(kv){return kv[0].replace(/_/g,' ').toUpperCase()+': '+kv[1];}).join('%0A');
-          window.open('mailto:membership@summit.haus?subject=Summit%20Haus%20Membership%20Request&body='+body,'_blank');
-        }
-      }).catch(function(err) {
-        console.error(err);
-        st.className='form-status error-msg'; st.textContent='Delivery error. Please email membership@summit.haus directly.';
-        btn.disabled=false; txt.textContent='Send';
-      });
-    });
-  })();
-</script>
-
 <script>
   (function () {
     var MEMBERSHIP_EMAIL = "membership@summit.haus";
@@ -447,6 +224,18 @@ STEP 3: Fix Vercel 404
         byId("waitlist").scrollIntoView({ behavior: "smooth" });
       });
     });
+ 
+    var heroBtn = byId("heroBtn");
+    if (heroBtn) {
+      heroBtn.addEventListener("mouseenter", function () {
+        heroBtn.style.background = "var(--gold)";
+        heroBtn.style.color = "var(--navy)";
+      });
+      heroBtn.addEventListener("mouseleave", function () {
+        heroBtn.style.background = "transparent";
+        heroBtn.style.color = "var(--gold-light)";
+      });
+    }
  
     function validate() {
       var valid = true;
@@ -464,9 +253,12 @@ STEP 3: Fix Vercel 404
     }
  
     ["first_name", "last_name", "email"].forEach(function (id) {
-      byId(id).addEventListener("input", function () {
-        byId("field_" + id).classList.remove("error");
-      });
+      var el = byId(id);
+      if (el) {
+        el.addEventListener("input", function () {
+          byId("field_" + id).classList.remove("error");
+        });
+      }
     });
  
     byId("waitlistForm").addEventListener("submit", function (event) {
@@ -485,14 +277,14 @@ STEP 3: Fix Vercel 404
         submitted_at: new Date().toISOString().replace("T", " ").substring(0, 19) + " UTC"
       };
  
-      var button = byId("submitBtn");
-      var text = byId("submitText");
-      var status = byId("formStatus");
+      var btn = byId("submitBtn");
+      var txt = byId("submitText");
+      var st = byId("formStatus");
  
-      button.disabled = true;
-      text.textContent = "Sending...";
-      status.className = "form-status";
-      status.textContent = "Transmitting your request...";
+      btn.disabled = true;
+      txt.textContent = "Sending...";
+      st.className = "form-status sending";
+      st.textContent = "Transmitting your request...";
  
       var formPayload = new FormData();
       formPayload.append("_subject", "Summit Haus Membership Request");
@@ -522,17 +314,13 @@ STEP 3: Fix Vercel 404
           "mailto:" + MEMBERSHIP_EMAIL +
           "?subject=Summit%20Haus%20Membership%20Request&body=" + body;
  
-        status.className = "form-status";
-        status.textContent = "Please send the prepared email to complete your request.";
-        button.disabled = false;
-        text.textContent = "Send";
+        st.className = "form-status sending";
+        st.textContent = "Please send the prepared email to complete your request.";
+        btn.disabled = false;
+        txt.textContent = "Send";
       });
     });
   })();
 </script>
 </body>
 </html>
-
-
-
-
