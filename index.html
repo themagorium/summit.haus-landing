@@ -285,9 +285,35 @@ body {
       <input type="email" name="email" id="email" placeholder="Private Email Address" required />
       <p class="field-error">A valid email address is required.</p>
     </div>
-    <div class="form-field">
-      <input type="tel" name="phone" id="phone" placeholder="Phone Number (optional)" />
-    </div>
+<div class="form-row phone-row">
+  <div class="form-field">
+    <select name="country_code" id="country_code" aria-label="Country code">
+      <option value="+1">+1 US / CA</option>
+      <option value="+41">+41 CH</option>
+      <option value="+44">+44 UK</option>
+      <option value="+33">+33 FR</option>
+      <option value="+39">+39 IT</option>
+      <option value="+34">+34 ES</option>
+      <option value="+49">+49 DE</option>
+      <option value="+971">+971 AE</option>
+      <option value="+966">+966 SA</option>
+      <option value="+974">+974 QA</option>
+      <option value="+965">+965 KW</option>
+      <option value="+852">+852 HK</option>
+      <option value="+65">+65 SG</option>
+      <option value="+61">+61 AU</option>
+      <option value="+81">+81 JP</option>
+      <option value="+86">+86 CN</option>
+      <option value="+91">+91 IN</option>
+      <option value="+52">+52 MX</option>
+      <option value="+55">+55 BR</option>
+      <option value="+27">+27 ZA</option>
+    </select>
+  </div>
+  <div class="form-field">
+    <input type="tel" name="phone" id="phone" placeholder="Phone Number (optional)" />
+  </div>
+</div>
     <div class="form-field">
       <input type="text" name="city" id="city" placeholder="City of Residence" />
     </div>
