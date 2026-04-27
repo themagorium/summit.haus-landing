@@ -553,13 +553,7 @@ byId("formSuccess").scrollIntoView({ behavior: "smooth", block: "center" });
  
         localStorage.setItem("summitHausInquiry:" + key, payload.submitted_at);
  
-        st.textContent = "";
-        st.className = "form-status";
- 
-        byId("waitlistForm").style.display = "none";
-        byId("formSuccess").classList.add("visible");
-        byId("formSuccess").focus();
-        byId("formSuccess").scrollIntoView({ behavior: "smooth", block: "center" });
+       
       }).catch(function () {
         var body = Object.keys(payload).map(function (field) {
           return encodeURIComponent(field.replace(/_/g, " ").toUpperCase() + ": " + payload[field]);
