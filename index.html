@@ -409,7 +409,7 @@ body {
     </div>
     <span style="font-size:0.48rem;letter-spacing:0.3em;text-transform:uppercase;color:rgba(201,168,76,0.5);font-family:'Montserrat',sans-serif;">Scan to Access</span>
   </div>
-  <p class="footer-copy">&#169; 2026 Summit Haus AG. All rights reserved.</p>
+  <p class="footer-copy">&#169; 2026 Summit Haus . All rights reserved.</p>
 </footer>
 <script>
   (function () {
@@ -529,7 +529,12 @@ body {
       txt.textContent = "Sending...";
       st.className = "form-status sending";
       st.textContent = "Transmitting your request...";
- 
+ byId("waitlistForm").style.display = "none";
+st.textContent = "";
+st.className = "form-status";
+byId("formSuccess").classList.add("visible");
+byId("formSuccess").focus();
+byId("formSuccess").scrollIntoView({ behavior: "smooth", block: "center" });
       var formPayload = new FormData();
       formPayload.append("_subject", "Summit Haus Membership Request");
       formPayload.append("_captcha", "false");
