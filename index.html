@@ -411,6 +411,22 @@ body {
       return document.getElementById(id);
     }
  
+    function showDuplicateNotice() {
+      var duplicatePopover = byId("duplicatePopover");
+      if (duplicatePopover) {
+        duplicatePopover.classList.add("visible");
+        duplicatePopover.setAttribute("aria-hidden", "false");
+      }
+    }
+ 
+    function duplicateKey(payload) {
+      return [
+        payload.first_name.toLowerCase(),
+        payload.last_name.toLowerCase(),
+        payload.city.toLowerCase()
+      ].join("|");
+    }
+ 
     document.querySelectorAll('a[href="#waitlist"]').forEach(function (anchor) {
       anchor.addEventListener("click", function (event) {
         event.preventDefault();
@@ -418,15 +434,32 @@ body {
       });
     });
  
-    var heroBtn = byId("heroBtn");
-    if (heroBtn) {
-      heroBtn.addEventListener("mouseenter", function () {
-        heroBtn.style.background = "var(--gold)";
-        heroBtn.style.color = "var(--navy)";
+    var privacyLink = byId("privacyLink");
+    var privacyPopover = byId("privacyPopover");
+    var privacyClose = byId("privacyClose");
+ 
+    if (privacyLink && privacyPopover) {
+      privacyLink.addEventListener("click", function (event) {
+        event.preventDefault();
+        privacyPopover.classList.add("visible");
+        privacyPopover.setAttribute("aria-hidden", "false");
       });
-      heroBtn.addEventListener("mouseleave", function () {
-        heroBtn.style.background = "transparent";
-        heroBtn.style.color = "var(--gold-light)";
+    }
+ 
+    if (privacyClose && privacyPopover) {
+      privacyClose.addEventListener("click", function () {
+        privacyPopover.classList.remove("visible");
+        privacyPopover.setAttribute("aria-hidden", "true");
+      });
+    }
+ 
+    var duplicateClose = byId("duplicateClose");
+    var duplicatePopover = byId("duplicatePopover");
+ 
+    if (duplicateClose && duplicatePopover) {
+      duplicateClose.addEventListener("click", function () {
+        duplicatePopover.classList.remove("visible");
+        duplicatePopover.setAttribute("aria-hidden", "true");
       });
     }
  
@@ -462,14 +495,22 @@ body {
         first_name: byId("first_name").value.trim(),
         last_name: byId("last_name").value.trim(),
         email: byId("email").value.trim(),
-      country_code: byId("country_code").value.trim() || "-",
-phone: byId("phone").value.trim() || "-",
+        country_code: byId("country_code") ? byId("country_code").value.trim() || "-" : "-",
+        phone: byId("phone").value.trim() || "-",
         city: byId("city").value.trim() || "-",
         referred_by: byId("referred_by").value || "-",
         referral_name: byId("referral_name").value.trim() || "-",
         message: byId("message").value.trim() || "-",
         submitted_at: new Date().toISOString().replace("T", " ").substring(0, 19) + " UTC"
       };
+ 
+      var key = duplicateKey(payload);
+      var stored = localStorage.getItem("summitHausInquiry:" + key);
+ 
+      if (stored) {
+        showDuplicateNotice();
+        return;
+      }
  
       var btn = byId("submitBtn");
       var txt = byId("submitText");
@@ -485,8 +526,8 @@ phone: byId("phone").value.trim() || "-",
       formPayload.append("_captcha", "false");
       formPayload.append("_template", "table");
  
-      Object.keys(payload).forEach(function (key) {
-        formPayload.append(key, payload[key]);
+      Object.keys(payload).forEach(function (field) {
+        formPayload.append(field, payload[field]);
       });
  
       fetch(FORM_ENDPOINT, {
@@ -496,12 +537,18 @@ phone: byId("phone").value.trim() || "-",
       }).then(function (response) {
         if (!response.ok) throw new Error("Form delivery failed");
  
+        localStorage.setItem("summitHausInquiry:" + key, payload.submitted_at);
+ 
+        st.textContent = "";
+        st.className = "form-status";
+ 
         byId("waitlistForm").style.display = "none";
         byId("formSuccess").classList.add("visible");
         byId("formSuccess").focus();
+        byId("formSuccess").scrollIntoView({ behavior: "smooth", block: "center" });
       }).catch(function () {
-        var body = Object.keys(payload).map(function (key) {
-          return encodeURIComponent(key.replace(/_/g, " ").toUpperCase() + ": " + payload[key]);
+        var body = Object.keys(payload).map(function (field) {
+          return encodeURIComponent(field.replace(/_/g, " ").toUpperCase() + ": " + payload[field]);
         }).join("%0A");
  
         window.location.href =
