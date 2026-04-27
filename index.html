@@ -232,6 +232,44 @@ body {
     grid-template-columns: 1fr !important;
   }
 }
+    .duplicate-popover {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 60;
+  display: none;
+  width: min(420px, calc(100vw - 3rem));
+  transform: translate(-50%, -50%);
+  padding: 2rem;
+  background: rgba(7, 16, 28, 0.97);
+  border: 1px solid rgba(201,168,76,0.32);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.45);
+  color: rgba(240,225,195,0.9);
+  text-align: center;
+}
+ 
+.duplicate-popover.visible {
+  display: block;
+}
+ 
+.duplicate-popover p {
+  margin: 0;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.25rem;
+  line-height: 1.6;
+  letter-spacing: 0.04em;
+}
+ 
+.duplicate-close {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.65rem;
+  border: 0;
+  background: transparent;
+  color: var(--gold);
+  cursor: pointer;
+  font-size: 0.8rem;
+}
   </style>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Montserrat:wght@300;400;500;600&display=swap">
 </head>
